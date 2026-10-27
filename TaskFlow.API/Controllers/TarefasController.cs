@@ -19,12 +19,15 @@ public class TarefasController : ControllerBase
         _service = service;
     }
 
-    /// <summary>Lista todas as tarefas.</summary>
+    /// <summary>
+    /// Lista as tarefas. Use ?status=Pendente, ?status=EmAndamento ou ?status=Concluida para filtrar.
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<TarefaResponseDto>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<TarefaResponseDto>>> Listar()
+    [ProducesResponseType(typeof(ErroResponse), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<IEnumerable<TarefaResponseDto>>> Listar([FromQuery] string? status)
     {
-        var tarefas = await _service.ListarAsync();
+        var tarefas = await _service.ListarAsync(status);
         return Ok(tarefas);
     }
 

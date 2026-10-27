@@ -1,3 +1,5 @@
+using System.Globalization;
+using System.Text;
 using TaskFlow.API.Exceptions;
 using TaskFlow.API.Models.DTOs;
 using TaskFlow.API.Models.Entities;
@@ -22,9 +24,16 @@ public class TarefaService : ITarefaService
         _repository = repository;
     }
 
-    public async Task<IEnumerable<TarefaResponseDto>> ListarAsync()
+    public async Task<IEnumerable<TarefaResponseDto>> ListarAsync(string? status = null)
     {
-        var tarefas = await _repository.ListarAsync();
+        StatusTarefa? filtro = null;
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            filtro = ConverterStatus(status);
+        }
+
+        var tarefas = await _repository.ListarAsync(filtro);
         return tarefas.Select(ToDto);
     }
 
@@ -103,6 +112,41 @@ public class TarefaService : ITarefaService
 
         await _repository.AtualizarAsync(tarefa);
         return ToDto(tarefa);
+    }
+
+    /// <summary>
+    /// Converte o texto recebido na query string para o enum (RF08).
+    /// Aceita maiúsculas/minúsculas, espaços e acentos: "Pendente", "emandamento", "Concluída"...
+    /// </summary>
+    private static StatusTarefa ConverterStatus(string valor)
+    {
+        var normalizado = RemoverAcentos(valor).Replace(" ", string.Empty);
+
+        if (!int.TryParse(normalizado, out _)
+            && Enum.TryParse<StatusTarefa>(normalizado, ignoreCase: true, out var resultado)
+            && Enum.IsDefined(resultado))
+        {
+            return resultado;
+        }
+
+        throw new RegraNegocioException(
+            $"Status '{valor}' inválido. Valores aceitos: Pendente, EmAndamento, Concluida.");
+    }
+
+    private static string RemoverAcentos(string texto)
+    {
+        var decomposto = texto.Trim().Normalize(NormalizationForm.FormD);
+        var resultado = new StringBuilder();
+
+        foreach (var caractere in decomposto)
+        {
+            if (CharUnicodeInfo.GetUnicodeCategory(caractere) != UnicodeCategory.NonSpacingMark)
+            {
+                resultado.Append(caractere);
+            }
+        }
+
+        return resultado.ToString().Normalize(NormalizationForm.FormC);
     }
 
     private async Task<Tarefa> BuscarOuFalharAsync(int id)
