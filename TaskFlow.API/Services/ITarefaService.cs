@@ -4,7 +4,7 @@ namespace TaskFlow.API.Services;
 
 public interface ITarefaService
 {
-    Task<IEnumerable<TarefaResponseDto>> ListarAsync();
+    Task<IEnumerable<TarefaResponseDto>> ListarAsync(string? status = null);
     Task<TarefaResponseDto> ObterPorIdAsync(int id);
     Task<TarefaResponseDto> CriarAsync(CriarTarefaDto dto);
     Task<TarefaResponseDto> AtualizarAsync(int id, AtualizarTarefaDto dto);
