@@ -87,7 +87,23 @@ public class TarefaService : ITarefaService
         return ToDto(tarefa);
     }
 
-    //__TRANSICOES__
+    public async Task<TarefaResponseDto> ConcluirAsync(int id)
+    {
+        var tarefa = await BuscarOuFalharAsync(id);
+
+        // Regra de negócio (RF07): somente EmAndamento -> Concluida
+        if (tarefa.Status != StatusTarefa.EmAndamento)
+        {
+            throw new RegraNegocioException(
+                $"Não é possível concluir a tarefa {id}: o status atual é '{tarefa.Status}'. Apenas tarefas EmAndamento podem ser concluídas.");
+        }
+
+        tarefa.Status = StatusTarefa.Concluida;
+        tarefa.DataConclusao = DateTime.UtcNow;   // preenchida automaticamente ao concluir
+
+        await _repository.AtualizarAsync(tarefa);
+        return ToDto(tarefa);
+    }
 
     private async Task<Tarefa> BuscarOuFalharAsync(int id)
     {
