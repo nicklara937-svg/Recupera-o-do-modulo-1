@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.API.Data;
+using TaskFlow.API.Middlewares;
 using TaskFlow.API.Repositories;
 using TaskFlow.API.Services;
 
@@ -21,6 +22,9 @@ builder.Services.AddScoped<ITarefaService, TarefaService>();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Deve ser o primeiro da pipeline para capturar exceções de todas as etapas seguintes
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();
