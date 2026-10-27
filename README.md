@@ -219,10 +219,6 @@ Fluxo com branches por funcionalidade integradas em `develop` e liberadas na `ma
 
 Commits semânticos (`feat:`, `fix:`, `docs:`, `chore:`, `refactor:`).
 
-## 🎥 Vídeo de Apresentação
-
-Inserir link do vídeo.
-
 ## 👥 Autoria
+Nicolas Lara
 
-Inserir nome(s) do(s) integrante(s).
