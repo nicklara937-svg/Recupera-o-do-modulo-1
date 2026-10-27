@@ -1,7 +1,9 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.API.Data;
 using TaskFlow.API.Middlewares;
+using TaskFlow.API.Models.DTOs;
 using TaskFlow.API.Repositories;
 using TaskFlow.API.Services;
 
@@ -9,7 +11,27 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controllers + serialização dos enums como texto (ex.: "EmAndamento")
 builder.Services.AddControllers()
-    .AddJsonOptions(opcoes => opcoes.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+    .AddJsonOptions(opcoes => opcoes.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .ConfigureApiBehaviorOptions(opcoes =>
+    {
+        // Erros de validação de entrada (DataAnnotations) seguem o mesmo padrão JSON do middleware
+        opcoes.InvalidModelStateResponseFactory = contexto =>
+        {
+            var detalhes = contexto.ModelState.Values
+                .SelectMany(valor => valor.Errors)
+                .Select(erro => string.IsNullOrWhiteSpace(erro.ErrorMessage) ? "Valor inválido." : erro.ErrorMessage)
+                .ToList();
+
+            var resposta = new ErroResponse(
+                StatusCodes.Status400BadRequest,
+                "Os dados enviados são inválidos.",
+                detalhes,
+                contexto.HttpContext.Request.Path.ToString(),
+                DateTime.UtcNow);
+
+            return new BadRequestObjectResult(resposta);
+        };
+    });
 
 // Entity Framework Core + SQL Server
 builder.Services.AddDbContext<AppDbContext>(opcoes =>
