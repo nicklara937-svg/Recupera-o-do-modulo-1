@@ -59,7 +59,6 @@ public class ExceptionHandlingMiddleware
             return;
         }
 
-        context.Response.Clear();
         context.Response.StatusCode = status;
 
         var erro = new ErroResponse(
