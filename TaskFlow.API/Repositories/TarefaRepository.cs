@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TaskFlow.API.Data;
 using TaskFlow.API.Models.Entities;
+using TaskFlow.API.Models.Enums;
 
 namespace TaskFlow.API.Repositories;
 
@@ -17,10 +18,17 @@ public class TarefaRepository : ITarefaRepository
         _context = context;
     }
 
-    public async Task<IEnumerable<Tarefa>> ListarAsync()
+    public async Task<IEnumerable<Tarefa>> ListarAsync(StatusTarefa? status = null)
     {
-        return await _context.Tarefas
-            .AsNoTracking()
+        var consulta = _context.Tarefas.AsNoTracking();
+
+        // Filtro opcional por status (RF08) executado no banco (WHERE)
+        if (status.HasValue)
+        {
+            consulta = consulta.Where(t => t.Status == status.Value);
+        }
+
+        return await consulta
             .OrderBy(t => t.Id)
             .ToListAsync();
     }
