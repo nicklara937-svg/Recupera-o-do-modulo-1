@@ -70,6 +70,23 @@ public class TarefaService : ITarefaService
         await _repository.RemoverAsync(tarefa);
     }
 
+    public async Task<TarefaResponseDto> IniciarAsync(int id)
+    {
+        var tarefa = await BuscarOuFalharAsync(id);
+
+        // Regra de negócio (RF06): somente Pendente -> EmAndamento
+        if (tarefa.Status != StatusTarefa.Pendente)
+        {
+            throw new RegraNegocioException(
+                $"Não é possível iniciar a tarefa {id}: o status atual é '{tarefa.Status}'. Apenas tarefas Pendentes podem ser iniciadas.");
+        }
+
+        tarefa.Status = StatusTarefa.EmAndamento;
+
+        await _repository.AtualizarAsync(tarefa);
+        return ToDto(tarefa);
+    }
+
     //__TRANSICOES__
 
     private async Task<Tarefa> BuscarOuFalharAsync(int id)

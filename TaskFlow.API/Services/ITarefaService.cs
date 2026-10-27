@@ -9,4 +9,5 @@ public interface ITarefaService
     Task<TarefaResponseDto> CriarAsync(CriarTarefaDto dto);
     Task<TarefaResponseDto> AtualizarAsync(int id, AtualizarTarefaDto dto);
     Task ExcluirAsync(int id);
+    Task<TarefaResponseDto> IniciarAsync(int id);
 }
