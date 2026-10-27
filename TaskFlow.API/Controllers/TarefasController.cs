@@ -68,4 +68,26 @@ public class TarefasController : ControllerBase
         await _service.ExcluirAsync(id);
         return NoContent();
     }
+
+    /// <summary>Inicia uma tarefa (Pendente -> EmAndamento).</summary>
+    [HttpPatch("{id:int}/iniciar")]
+    [ProducesResponseType(typeof(TarefaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErroResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErroResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TarefaResponseDto>> Iniciar(int id)
+    {
+        var tarefa = await _service.IniciarAsync(id);
+        return Ok(tarefa);
+    }
+
+    /// <summary>Conclui uma tarefa (EmAndamento -> Concluida) e registra a DataConclusao.</summary>
+    [HttpPatch("{id:int}/concluir")]
+    [ProducesResponseType(typeof(TarefaResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErroResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErroResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<TarefaResponseDto>> Concluir(int id)
+    {
+        var tarefa = await _service.ConcluirAsync(id);
+        return Ok(tarefa);
+    }
 }
